@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import io from 'socket.io-client';
 import './App.css';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'https://ai-voice-moderator-backend.onrender.com';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8080';
 const socket = io(BACKEND_URL);
 
 function App() {
@@ -75,11 +75,34 @@ function App() {
     };
   }, []);
 
+  // Session Timer
+  const sessionTimeoutRef = useRef(null);
+  const SESSION_LIMIT = 2 * 60 * 1000; // 2 minutes
+  const COOLDOWN_PERIOD = 12 * 60 * 60 * 1000; // 12 hours
+
   const startRecording = async () => {
+    // Check for cooldown
+    const lastSessionEnd = localStorage.getItem('lastSessionEnd');
+    if (lastSessionEnd) {
+      const timePassed = Date.now() - parseInt(lastSessionEnd, 10);
+      if (timePassed < COOLDOWN_PERIOD) {
+        const hoursRemaining = ((COOLDOWN_PERIOD - timePassed) / (1000 * 60 * 60)).toFixed(1);
+        alert(`Limit reached! You can start a new session in ${hoursRemaining} hours.`);
+        return;
+      }
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
       setIsRecording(true);
+
+      // Start 2-minute timer
+      sessionTimeoutRef.current = setTimeout(() => {
+        stopRecording();
+        localStorage.setItem('lastSessionEnd', Date.now().toString());
+        alert("This is a testing version and session is kept 2 min.");
+      }, SESSION_LIMIT);
 
       // Use default sample rate (usually 44.1k or 48k)
       audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
@@ -121,6 +144,12 @@ function App() {
   };
 
   const stopRecording = () => {
+    // Clear timer if stopped manually
+    if (sessionTimeoutRef.current) {
+      clearTimeout(sessionTimeoutRef.current);
+      sessionTimeoutRef.current = null;
+    }
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
