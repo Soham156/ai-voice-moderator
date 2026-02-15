@@ -93,6 +93,12 @@ io.on('connection', (socket) => {
       }
     };
 
+    // Initial Greeting
+    const introText = "Hello! I am the AI Voice Moderator for AWS Community Day Ahmedabad 2026. How can I help you, or shall we start discussing?";
+    speakResponse(introText);
+    conversationHistory.push({ role: "assistant", content: [{ text: introText }] });
+    socket.emit('ai-response', { text: introText });
+
 
 
     // Conversation history for context

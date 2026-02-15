@@ -210,6 +210,16 @@ function App() {
   return (
     <>
       <h1>AI Voice Moderator</h1>
+
+      <div className="guidelines-box">
+        <h3>Session Instructions</h3>
+        <ul>
+          <li><strong>Microphone:</strong> Please ensure you have granted microphone permissions.</li>
+          <li><strong>Speaking:</strong> Speak clearly and wait for the AI to finish responding.</li>
+          <li><strong>Issues?</strong> If it doesn't work, try reloading the page or checking your browser settings.</li>
+        </ul>
+      </div>
+
       <div className="card">
         {!isRecording ? (
           <button onClick={startRecording} className="start-btn">
