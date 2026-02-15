@@ -96,7 +96,11 @@ io.on('connection', (socket) => {
     // Initial Greeting
     const introText = "Hello! I am the AI Voice Moderator for AWS Community Day Ahmedabad 2026. How can I help you, or shall we start discussing?";
     speakResponse(introText);
+    
+    // Add a dummy user message to satisfy Bedrock requirement: "First message must be from user"
+    conversationHistory.push({ role: "user", content: [{ text: "(User started the session)" }] });
     conversationHistory.push({ role: "assistant", content: [{ text: introText }] });
+    
     socket.emit('ai-response', { text: introText });
 
 
